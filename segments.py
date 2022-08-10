@@ -61,7 +61,6 @@ class SegmentsManager(object):
         placedmask = np.ones(distance.shape)
         lx, ly = distance.shape
         result = []
-        rad = 5
         heights = []
         circles = []
 
@@ -73,7 +72,7 @@ class SegmentsManager(object):
                 placedmask[x - mindist:x + mindist +
                            1, y - mindist:y + mindist + 1] = 0
                 s = distance[x, y]
-                circles.append((x, y, rad, s))
+                circles.append((x, y))
                 heights.append(s)
 
         ixs = np.argsort(heights)
@@ -88,16 +87,20 @@ class SegmentsManager(object):
         if the selected algorithm used is Distance Peak, used the method
         compute_distance_peaks to compute the features"""
 
+
         mask = image_manager.mask
         features = np.zeros(mask.shape)
 
         if params.peak_min_distance_from_edge < 1:
             params.peak_min_distance_from_edge = 1
 
-        circles = self.compute_distance_peaks(mask, params)
+        if image_manager.stardist_polygons is not None:
+            circles = image_manager.stardist_polygons['points']
+        else:
+            circles = self.compute_distance_peaks(mask, params)
 
         for ix, c in enumerate(circles):
-            x, y, dum1, dum2 = c
+            x, y = c
             for f in range(3):
                 features[x - 1 + f, y] = ix + 1
                 features[x, y - 1 + f] = ix + 1
@@ -135,31 +138,35 @@ class SegmentsManager(object):
         features. Requires the mask, th base mask, the features and an
         instance of the imageprocessingparams"""
 
-        markers = self.features
-        base_mask = image_manager.base_mask
-        mask = image_manager.mask
-        inverted_mask = 1 - image_manager.mask
-
-        if params.outline_use_base_mask:
-            tmpmask = np.ones(mask.shape)
-            tmpmask[base_mask > mask] = 0
-            distance = ndimage.morphology.distance_transform_edt(tmpmask)
-
+        if image_manager.stardist_labels is not None:
+            self.labels = image_manager.stardist_labels
         else:
-            distance = - \
-                ndimage.morphology.distance_transform_edt(inverted_mask)
+            markers = self.features
+            base_mask = image_manager.base_mask
+            mask = image_manager.mask
+            inverted_mask = 1 - image_manager.mask
 
-        mindist = np.min(distance)
-        markpoints = markers > 0
-        distance[markpoints] = mindist
-        labels = morphology.watershed(distance, markers, mask=inverted_mask)
+            if params.outline_use_base_mask:
+                tmpmask = np.ones(mask.shape)
+                tmpmask[base_mask > mask] = 0
+                distance = ndimage.morphology.distance_transform_edt(tmpmask)
 
-        self.labels = labels
+            else:
+                distance = - \
+                    ndimage.morphology.distance_transform_edt(inverted_mask)
+
+            mindist = np.min(distance)
+            markpoints = markers > 0
+            distance[markpoints] = mindist
+            labels = morphology.watershed(distance, markers, mask=inverted_mask)
+
+            self.labels = labels
 
     def compute_segments(self, params, image_manager):
         """Calls the different methods of the module in the right order.
         Can be used as the interface of this module in the main module of the
         software"""
+
         self.compute_features(params, image_manager)
         self.overlay_base_w_features(image_manager)
         self.overlay_fluor_w_features(image_manager)
