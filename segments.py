@@ -17,6 +17,7 @@ from tkinter.filedialog import asksaveasfilename
 # AB
 from skimage.transform import EuclideanTransform, warp
 
+
 class SegmentsManager(object):
     """Main class of the module.
     The class is responsible for the computation of the features of the image.
@@ -68,9 +69,9 @@ class SegmentsManager(object):
             x, y = c
 
             if x >= minmargin and y >= minmargin and x <= lx - minmargin \
-               and y <= ly - minmargin and placedmask[x, y]:
+                    and y <= ly - minmargin and placedmask[x, y]:
                 placedmask[x - mindist:x + mindist +
-                           1, y - mindist:y + mindist + 1] = 0
+                                       1, y - mindist:y + mindist + 1] = 0
                 s = distance[x, y]
                 circles.append((x, y))
                 heights.append(s)
@@ -86,7 +87,6 @@ class SegmentsManager(object):
         requires a mask and an instance of the imageprocessingparams
         if the selected algorithm used is Distance Peak, used the method
         compute_distance_peaks to compute the features"""
-
 
         mask = image_manager.mask
         features = np.zeros(mask.shape)
@@ -191,4 +191,4 @@ class SegmentsManager(object):
         mask_aligned = np.array(mask_aligned, dtype=np.int32)
         # CARE
 
-        imsave(filename+'.tif', mask_aligned)
+        imsave(filename + '.tif', mask_aligned)

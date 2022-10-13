@@ -786,8 +786,7 @@ class Cell(object):
         """
 
         x0, y0, x1, y1 = self.box
-        img = color.gray2rgb(
-            np.zeros((x1 - x0 + 1, (len(images) + 4) * (y1 - y0 + 1))))
+        img = color.gray2rgb(np.zeros((x1 - x0 + 1, (len(images) + 4) * (y1 - y0 + 1))))
         bx0 = 0
         bx1 = x1 - x0 + 1
         by0 = 0
@@ -801,8 +800,9 @@ class Cell(object):
         perim = self.perim_mask
         axial = self.sept_mask
         cyto = self.cyto_mask
-        img[bx0:bx1, by0:by1] = color.gray2rgb(
-            background[x0:x1 + 1, y0:y1 + 1] * self.cell_mask)
+
+        img[bx0:bx1, by0:by1] = color.gray2rgb(background[x0:x1 + 1, y0:y1 + 1] * self.cell_mask)
+
         by0 = by0 + y1 - y0 + 1
         by1 = by1 + y1 - y0 + 1
         img[bx0:bx1, by0:by1] = color.gray2rgb(
