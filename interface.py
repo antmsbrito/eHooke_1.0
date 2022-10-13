@@ -1601,6 +1601,7 @@ class Interface(object):
         aswell as their fluor stats"""
         self.ehooke.parameters.cellprocessingparams.classify_cells = self.classify_cells_checkbox_value.get()
         self.ehooke.parameters.cellprocessingparams.microscope = self.microscope_value.get()
+        self.ehooke.parameters.cellprocessingparams.heatmap = self.heatmap_checkbox_value.get()
         septum_option = self.find_septum_menu_value.get()
         if septum_option == "Closed":
             self.ehooke.parameters.cellprocessingparams.find_septum = True
@@ -1834,6 +1835,7 @@ class Interface(object):
             self.canvas.mpl_disconnect(self.cid)
             self.cid = self.canvas.mpl_connect('button_release_event',
                                                self.on_press)
+
     def phase2_on_press(self, event):
         if event.button == 3:
             label = int(self.ehooke.cell_manager.merged_labels[
@@ -2015,6 +2017,18 @@ class Interface(object):
                                                       onvalue=True, offvalue=False)
         self.classify_cells_checkbox_value.set(self.ehooke.parameters.cellprocessingparams.classify_cells)
         self.classify_cells_checkbox.pack(side="left")
+
+
+        self.heatmap_frame = tk.Frame(self.parameters_panel)
+        self.heatmap_frame.pack(side="top", fill="x")
+        self.heatmap_label = tk.Label(self.heatmap_frame, text="Compute fluorescence heatmap: ")
+        self.heatmap_label.pack(side="left")
+        self.heatmap_checkbox_value = tk.BooleanVar()
+        self.heatmap_checkbox = tk.Checkbutton(self.heatmap_frame, variable=self.heatmap_checkbox_value,
+                                                      onvalue=True, offvalue=False)
+        self.heatmap_checkbox_value.set(self.ehooke.parameters.cellprocessingparams.heatmap)
+        self.heatmap_checkbox.pack(side="left")
+
 
         self.find_septum_frame = tk.Frame(self.parameters_panel)
         self.find_septum_frame.pack(side="top", fill="x")

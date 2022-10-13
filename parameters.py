@@ -195,6 +195,9 @@ class CellParameters(object):
         self.microscope = "Epifluorescence"
         self.microscope_options = ["Epifluorescence", "SIM"]
 
+        #
+        self.heatmap = False
+
 
         # cell filtering criteria
         self.cell_filters = []
