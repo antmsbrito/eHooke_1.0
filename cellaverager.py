@@ -27,13 +27,19 @@ class CellAverager:
 
     def align(self):
         for key in self.cellman.cells:
+
+            if np.count_nonzero(self.cellman.cells[key].cell_mask) == 1:
+                self.cellman.cells[key].selection_state = 0
+                continue
+
             angle = self.calculate_rotation_angle(key)
             self.cellman.cells[key].aligned_cell_mask = rotate(self.cellman.cells[key].cell_mask, angle)
             self.cellman.cells[key].aligned_fluor_mask = rotate(
                 self.cellman.cells[key].fluor * self.cellman.cells[key].cell_mask, angle)
 
     def average(self):
-        selected_cells = [self.cellman.cells[key] for key in self.cellman.cells if self.cellman.cells[key].selection_state == 1]
+        selected_cells = [self.cellman.cells[key] for key in self.cellman.cells if
+                          self.cellman.cells[key].selection_state == 1]
 
         mean_x = int(np.median([s.aligned_fluor_mask.shape[0] for s in selected_cells]))
         mean_y = int(np.median([s.aligned_fluor_mask.shape[1] for s in selected_cells]))
