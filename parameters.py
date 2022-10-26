@@ -195,7 +195,10 @@ class CellParameters(object):
         self.microscope = "Epifluorescence"
         self.microscope_options = ["Epifluorescence", "SIM"]
 
-        #
+        # AB
+        self.secondary_channel = False
+
+        # AB
         self.heatmap = False
 
 
@@ -241,7 +244,7 @@ class CellParameters(object):
         """Loads frame parameters from a ConfigParser object of the
         configuration file. The section parameters specifies the configuration
         file section"""
-
+        # todo update load and save of pars
         self.axial_step = int(parser.get(section, "axial step"))
         self.find_septum = check_bool(parser.get(section, "find septum"))
         self.find_openseptum = check_bool(parser.get(section, "find open septum"))

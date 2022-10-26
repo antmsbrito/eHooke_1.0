@@ -255,7 +255,7 @@ class EHooke(object):
 
         self.cellcycleclassifier = CellCycleClassifier()
         self.cellcycleclassifier.classify_cells(self.image_manager, self.cell_manager,
-                                                self.parameters.cellprocessingparams.microscope)
+                                                self.parameters.cellprocessingparams.microscope, self.parameters.cellprocessingparams.secondary_channel)
 
     def select_cells_optional(self, signal_ratio):
         if self.image_manager.optional_image is not None:
