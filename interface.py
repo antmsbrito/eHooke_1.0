@@ -614,7 +614,7 @@ class Interface(object):
         self.mask_algorithm_label.pack(side="left")
         self.mask_algorithm_value = tk.StringVar()
         self.mask_algorithm_menu = tk.OptionMenu(self.mask_algorithm_frame, self.mask_algorithm_value,
-                                                 'Local Average', 'Isodata', 'StarDist')
+                                                 'Local Average', 'Isodata', 'StarDist', 'StarDist_BF')
         self.mask_algorithm_menu.pack(side="left")
         self.mask_algorithm_value.set(self.ehooke.parameters.imageloaderparams.mask_algorithm)
 

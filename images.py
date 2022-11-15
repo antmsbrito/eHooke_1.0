@@ -136,7 +136,21 @@ class ImageManager(object):
 
             base_mask = np.copy(self.stardist_labels)
 
-            self.base_mask = 1-img_as_float(base_mask > 0)
+            self.base_mask = 1 - img_as_float(base_mask > 0)
+
+        elif params.mask_algorithm == "StarDist_BF":
+
+            # invert again
+            if params.invert_base:
+                base_mask = 1 - base_mask
+
+            model = StarDist2D(None, name="StarDistSeg_BF", basedir='.')
+            base_mask = normalize(base_mask, 1, 99.8, axis=(0, 1))
+            self.stardist_labels, self.stardist_polygons = model.predict_instances(base_mask)
+
+            base_mask = np.copy(self.stardist_labels)
+
+            self.base_mask = 1 - img_as_float(base_mask > 0)
 
         else:
             print("Not a valid mask algorithm")
