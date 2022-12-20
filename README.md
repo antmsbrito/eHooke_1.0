@@ -10,24 +10,27 @@
 ## ---------------------------------------------------------
 ### Setup instructions:
 #### 1. Install Anaconda3 or Miniconda3
-#### 2. Clone or Download as zip this project
-###### https://github.com/brunomsaraiva/eHooke_1.0/archive/master.zip
-#### 3. Open Terminal inside eHooke directory
 ###### https://www.anaconda.com/distribution/
-#### 4. Create a new environment (optional)
-###### `conda create -n env_name python=3.6`
-#### 5. Activate environment (optional)
-###### `conda activate env_name`
-#### 6. Install requirements from file
-###### `conda install --file requirements.txt`
+
+#### 2. Clone or Download as zip this project
+
+#### 3. Open Terminal inside eHooke directory
+
+#### 4. Create the environment
+`conda env create --file environment.yml`
+
+#### 5. Activate environment 
+###### `conda activate eHookeEnvironment`
+
 #### 7. Test setup (optional)
 ###### `python test.py`
+
 ###### if program asks you to save a report and pcc scores everything is properly running
 ## ---------------------------------------------------------
 ### Usage Instructions:
 #### 1. Open Terminal inside eHooke directory
 #### 2. Activate environment (use if you created a new env)
-###### `conda activate env_name`
+###### `conda activate eHookeEnvironment`
 #### 3. Run eHooke with GUI
 ###### `python interface.py`
 ## ---------------------------------------------------------
@@ -35,7 +38,7 @@
 #### On windows
 ###### 1. Open a simple text editor
 ###### 2. Write:
-###### `call activate env_name`
+###### `call activate eHookeEnvironment`
 ###### `python interface.py`
 ###### `call conda deactivate`
 #### 3. Save file as run.bat (file extension needs to be .bat) inside eHooke folder

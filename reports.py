@@ -1,6 +1,9 @@
 ﻿"""Module used to create the report of the cell identification"""
+import matplotlib as mpl
 from skimage.io import imsave
 from skimage.util import img_as_float, img_as_uint
+from skimage.filters import threshold_isodata
+from skimage.color import gray2rgb
 from decimal import Decimal
 import cellprocessing as cp
 import numpy as np
@@ -168,7 +171,6 @@ class ReportManager:
                         number = number.rstrip("0").rstrip(".") if "." in number else number
                         lin = lin + '</td><td>' + number
 
-
                     lin += '</td></tr>\n'
                     noise.append(lin)
 
@@ -176,11 +178,12 @@ class ReportManager:
             print("Rejected Cells: " + str(count2))
             print("Noise objects: " + str(count3))
 
-            report.append("\n<h1>eHooke Report - <a href='https://github.com/BacterialCellBiologyLab/eHooke/wiki' target='_blank'>wiki</a></h1>")
+            report.append(
+                "\n<h1>eHooke Report - <a href='https://github.com/BacterialCellBiologyLab/eHooke/wiki' target='_blank'>wiki</a></h1>")
 
-            report.append("\n<h3>Total cells: " + str(count+count2) +"</h3>")
-            report.append("\n<h3>Selected cells: " + str(count) +"</h3>")
-            report.append("\n<h3>Rejected cells: " + str(count2) +"</h3>")
+            report.append("\n<h3>Total cells: " + str(count + count2) + "</h3>")
+            report.append("\n<h3>Selected cells: " + str(count) + "</h3>")
+            report.append("\n<h3>Rejected cells: " + str(count2) + "</h3>")
 
             if params.cellprocessingparams.classify_cells:
                 p1count = 0
@@ -198,15 +201,16 @@ class ReportManager:
                         elif cell.stats["Cell Cycle Phase"] == 3:
                             p3count += 1
 
-                report.append("\n<h3>Phase 1 cells: " + str(p1count) +"</h3>")
-                report.append("\n<h3>Phase 2 cells: " + str(p2count) +"</h3>")
-                report.append("\n<h3>Phase 3 cells: " + str(p3count) +"</h3>")
+                report.append("\n<h3>Phase 1 cells: " + str(p1count) + "</h3>")
+                report.append("\n<h3>Phase 2 cells: " + str(p2count) + "</h3>")
+                report.append("\n<h3>Phase 3 cells: " + str(p3count) + "</h3>")
 
             if params.imageloaderparams.units == "um":
-                report.append("\n<h3>Pixel size: " + params.imageloaderparams.pixel_size + " x " + params.imageloaderparams.pixel_size + " " + "\u03BC" + "m" +"</h3>")
+                report.append(
+                    "\n<h3>Pixel size: " + params.imageloaderparams.pixel_size + " x " + params.imageloaderparams.pixel_size + " " + "\u03BC" + "m" + "</h3>")
             else:
-                report.append("\n<h3>Pixel size: " + params.imageloaderparams.pixel_size + " x " + params.imageloaderparams.pixel_size + " " + params.imageloaderparams.units +"</h3>")
-
+                report.append(
+                    "\n<h3>Pixel size: " + params.imageloaderparams.pixel_size + " x " + params.imageloaderparams.pixel_size + " " + params.imageloaderparams.units + "</h3>")
 
             if len(selects) > 1:
                 report.extend(selects)
@@ -250,9 +254,9 @@ class ReportManager:
                     imsave(filename + "/_linescan_images" +
                            os.sep + key + '.png', img)
                     row = '<tr style="text-align:center"><td>' + key + '</td><td><img src="./' + '_linescan_images/' + key + '.png" alt="pic" width="200"/></td>' + \
-                        "<td>" + str(lin.background) + "</td>" + "<td>" + str(lin.membrane) + "</td>" + \
-                        "<td>" + str(lin.septum) + "</td>" + \
-                        "<td>" + str(lin.fr) + "</td></tr>"
+                          "<td>" + str(lin.background) + "</td>" + "<td>" + str(lin.membrane) + "</td>" + \
+                          "<td>" + str(lin.septum) + "</td>" + \
+                          "<td>" + str(lin.fr) + "</td></tr>"
                     table += row
                 except IndexError:
                     print("One Line Not Saved: too close to edge of image")
@@ -266,8 +270,8 @@ class ReportManager:
         if os.path.exists(filename):
             tmp = ""
             split_path = filename.split("_")
-            tmp = "_".join(split_path[:len(split_path)-1])
-            tmp += "_" + str(int(split_path[-1])+1)
+            tmp = "_".join(split_path[:len(split_path) - 1])
+            tmp += "_" + str(int(split_path[-1]) + 1)
             return self.check_filename(tmp)
 
         else:
@@ -347,11 +351,47 @@ class ReportManager:
 
         for key in cell_manager.cells.keys():
             x0, y0, x1, y1 = cell_manager.cells[key].box
-            fluor_cell = np.concatenate((fluor_img[x0:x1+1, y0:y1+1], fluor_img[x0:x1+1, y0:y1+1] * cell_manager.cells[key].cell_mask), axis=1)
+            fluor_cell = np.concatenate(
+                (fluor_img[x0:x1 + 1, y0:y1 + 1], fluor_img[x0:x1 + 1, y0:y1 + 1] * cell_manager.cells[key].cell_mask),
+                axis=1)
             imsave(filename + "/_cell_data/fluor/" + key + ".png",
                    img_as_uint(fluor_cell))
 
             if optional_image is not None:
-                optional_cell = np.concatenate((optional_image[x0:x1+1, y0:y1+1], optional_image[x0:x1+1, y0:y1+1] * cell_manager.cells[key].cell_mask), axis=1)
+                optional_cell = np.concatenate((optional_image[x0:x1 + 1, y0:y1 + 1],
+                                                optional_image[x0:x1 + 1, y0:y1 + 1] * cell_manager.cells[
+                                                    key].cell_mask), axis=1)
                 imsave(filename + "/_cell_data/optional/" + key + ".png",
                        img_as_uint(optional_cell))
+
+    def generate_color_heatmap(self, cell_manager):
+
+        filename = self.cell_data_filename
+        if not os.path.exists(filename + "/_heatmaps"):
+            os.makedirs(filename + "/_heatmaps")
+
+        imsave(filename + "/_heatmaps/" + "RawModel.tif", cell_manager.model_cell, plugin="tifffile", imagej=False,
+               description=str(len(cell_manager.cells)))
+
+        mask = cell_manager.model_cell > threshold_isodata(cell_manager.model_cell)
+        filtered = cell_manager.model_cell * mask
+
+        colormap = mpl.cm.get_cmap("coolwarm")
+        color_img = np.zeros(np.shape(gray2rgb(filtered)))
+
+        color_model = self.assign_color(filtered, color_img, colormap)
+        imsave(filename + "/_heatmaps/" + "ColorModel.png", color_model)
+
+    @staticmethod
+    def assign_color(modelmasked, outimage, cmap):
+        norm = mpl.colors.Normalize(vmin=np.amin(modelmasked[np.nonzero(modelmasked)]), vmax=np.amax(modelmasked))
+        for i in range(modelmasked.shape[0]):
+            for ii in range(modelmasked.shape[1]):
+                px = modelmasked[i, ii]
+                if np.abs(px) < 1e-3:
+                    outimage[i, ii] = (0, 0, 0)
+                else:
+                    rgba = cmap(norm(px))
+                    outimage[i, ii] = (rgba[0], rgba[1], rgba[2])
+
+        return outimage

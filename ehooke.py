@@ -12,6 +12,7 @@ from reports import ReportManager
 from linescan import LineScanManager
 from colocmanager import ColocManager
 from cellcycleclassifier import CellCycleClassifier
+from cellaverager import CellAverager  # todo
 
 
 class EHooke(object):
@@ -40,7 +41,7 @@ class EHooke(object):
         if filename is None:
             filename = tkFileDialog.askopenfilename(initialdir=self.working_dir)
 
-        self.working_dir = "/".join(filename.split("/")[:len(filename.split("/"))-1])
+        self.working_dir = "/".join(filename.split("/")[:len(filename.split("/")) - 1])
 
         self.base_path = filename
 
@@ -169,6 +170,9 @@ class EHooke(object):
             for k in self.cell_manager.cells.keys():
                 self.cell_manager.cells[k].stats["Cell Cycle Phase"] = 0
 
+        if self.parameters.cellprocessingparams.heatmap:
+            self.build_heatmap()
+
         print("Processing Cells Finished")
 
     def select_cells_phase(self, phase):
@@ -236,9 +240,9 @@ class EHooke(object):
             label = self.fluor_path.split("/")
             label = label[len(label) - 1].split(".")
             if len(label) > 2:
-                label = label[len(label)-3] + "." + label[len(label)-2]
+                label = label[len(label) - 3] + "." + label[len(label) - 2]
             else:
-                label = label[len(label)-2]
+                label = label[len(label) - 2]
 
         if self.image_manager.optional_image is not None:
             self.coloc_manager = ColocManager()
@@ -251,7 +255,7 @@ class EHooke(object):
 
         self.cellcycleclassifier = CellCycleClassifier()
         self.cellcycleclassifier.classify_cells(self.image_manager, self.cell_manager,
-                                                self.parameters.cellprocessingparams.microscope)
+                                                self.parameters.cellprocessingparams.microscope, self.parameters.cellprocessingparams.secondary_channel)
 
     def select_cells_optional(self, signal_ratio):
         if self.image_manager.optional_image is not None:
@@ -274,9 +278,9 @@ class EHooke(object):
             label = label[len(label) - 1].split(".")
 
             if len(label) > 2:
-                label = label[len(label)-3] + "." + label[len(label)-2]
+                label = label[len(label) - 3] + "." + label[len(label) - 2]
             else:
-                label = label[len(label)-2]
+                label = label[len(label) - 2]
 
         if len(self.linescan_manager.lines.keys()) > 0:
             self.linescan_manager.measure_fluorescence(
@@ -294,6 +298,9 @@ class EHooke(object):
                                                 self.cell_manager,
                                                 self.parameters)
 
+        if self.parameters.cellprocessingparams.heatmap:
+            self.report_manager.generate_color_heatmap(self.cell_manager)
+
         print("Reports Generated")
 
     def save_mask(self):
@@ -301,3 +308,8 @@ class EHooke(object):
 
     def save_labels(self, fn=None):
         self.segments_manager.save_labels(filename=fn)
+
+    def build_heatmap(self):
+
+        cell_averager = CellAverager(self.image_manager, self.cell_manager)
+        cell_averager.process()

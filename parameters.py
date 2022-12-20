@@ -65,7 +65,7 @@ class MaskParameters(object):
         # if true, phase will be inverted.
         # Useful when using fluorescence or light on dark background
 
-        self.mask_algorithms = ['Local Average', 'Isodata']
+        self.mask_algorithms = ['Local Average', 'Isodata', 'StarDist']
         self.mask_algorithm = 'Isodata'
 
         # used for local average algorithm
@@ -195,6 +195,12 @@ class CellParameters(object):
         self.microscope = "Epifluorescence"
         self.microscope_options = ["Epifluorescence", "SIM"]
 
+        # AB
+        self.secondary_channel = False
+
+        # AB
+        self.heatmap = False
+
 
         # cell filtering criteria
         self.cell_filters = []
@@ -238,7 +244,7 @@ class CellParameters(object):
         """Loads frame parameters from a ConfigParser object of the
         configuration file. The section parameters specifies the configuration
         file section"""
-
+        # todo update load and save of pars
         self.axial_step = int(parser.get(section, "axial step"))
         self.find_septum = check_bool(parser.get(section, "find septum"))
         self.find_openseptum = check_bool(parser.get(section, "find open septum"))

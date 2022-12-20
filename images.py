@@ -22,6 +22,8 @@ from scipy import ndimage
 from scipy.signal import fftconvolve
 from scipy.ndimage import center_of_mass
 from skimage.transform import EuclideanTransform, warp
+from csbdeep.utils import Path, normalize
+from stardist.models import StarDist2D, Config2D
 
 
 class ImageManager(object):
@@ -43,6 +45,9 @@ class ImageManager(object):
         self.optional_w_mask = None
         self.align_values = (0, 0)
 
+        self.stardist_labels = None
+        self.stardist_polygons = None
+
     def clear_all(self):
         """Sets the class back to the __init__ state"""
 
@@ -56,6 +61,9 @@ class ImageManager(object):
         self.fluor_w_mask = None
         self.optional_w_mask = None
         self.align_values = (0, 0)
+
+        self.stardist_labels = None
+        self.stardist_polygons = None
 
     def load_base_image(self, filename, params):
         """This method is responsible for the loading of the base image and
@@ -83,12 +91,15 @@ class ImageManager(object):
         """
 
         base_mask = np.copy(self.base_image)
+
         if params.invert_base:
             base_mask = 1 - base_mask
 
         if params.mask_algorithm == "Isodata":
             isodata_threshold = threshold_isodata(base_mask)
             base_mask = img_as_float(base_mask <= isodata_threshold)
+            self.base_mask = 1 - base_mask
+
 
         elif params.mask_algorithm == "Local Average":
             # need to invert because threshold_adaptive sets dark parts to 0
@@ -103,17 +114,46 @@ class ImageManager(object):
                                         offset=params.mask_offset)
 
             base_mask = 1.0 - (base_mask > threshold)
+            self.base_mask = 1 - base_mask
 
         elif params.mask_algorithm == "Absolute":
             value = float(raw_input("Insert Threshold Value: "))
             print(value)
 
             base_mask = img_as_float(base_mask <= value)
+            self.base_mask = 1 - base_mask
+
+
+        elif params.mask_algorithm == "StarDist":
+
+            # invert again
+            if params.invert_base:
+                base_mask = 1 - base_mask
+
+            model = StarDist2D(None, name="StarDistSeg", basedir='.')
+            base_mask = normalize(base_mask, 1, 99.8, axis=(0, 1))
+            self.stardist_labels, self.stardist_polygons = model.predict_instances(base_mask)
+
+            base_mask = np.copy(self.stardist_labels)
+
+            self.base_mask = 1 - img_as_float(base_mask > 0)
+
+        elif params.mask_algorithm == "StarDist_BF":
+
+            # invert again
+            if params.invert_base:
+                base_mask = 1 - base_mask
+
+            model = StarDist2D(None, name="StarDistSeg_BF", basedir='.')
+            base_mask = normalize(base_mask, 1, 99.8, axis=(0, 1))
+            self.stardist_labels, self.stardist_polygons = model.predict_instances(base_mask)
+
+            base_mask = np.copy(self.stardist_labels)
+
+            self.base_mask = 1 - img_as_float(base_mask > 0)
 
         else:
             print("Not a valid mask algorithm")
-
-        self.base_mask = 1 - base_mask
 
     def compute_mask(self, params):
         """Creates the mask for the base image.
@@ -126,15 +166,13 @@ class ImageManager(object):
         self.compute_base_mask(params)
 
         mask = np.copy(self.base_mask)
+
         closing_matrix = np.ones((int(params.mask_closing), int(params.mask_closing)))
 
         if params.mask_closing > 0:
             # removes small dark spots and then small white spots
-            mask = img_as_float(morphology.closing(
-                mask, closing_matrix))
-            mask = 1 - \
-                   img_as_float(morphology.closing(
-                       1 - mask, closing_matrix))
+            mask = img_as_float(morphology.closing(mask, closing_matrix))
+            mask = 1 - img_as_float(morphology.closing(1 - mask, closing_matrix))
 
         for f in range(params.mask_dilation):
             mask = morphology.erosion(mask, np.ones((3, 3)))
@@ -144,7 +182,6 @@ class ImageManager(object):
             mask = 1 - img_as_float(ndimage.binary_fill_holes(1.0 - mask))
 
         self.mask = mask
-
         self.overlay_mask_base_image()
 
     def load_fluor_image(self, filename, params):
@@ -167,7 +204,7 @@ class ImageManager(object):
 
         if params.auto_align:
             # Alignment is done by taking the maximum of the correlation
-            # between phase and fluorescence
+            # between phase and fluorescence (inverted mask so cells are white)
             corr = fftconvolve(inverted_mask, fluor_image[::-1, ::-1])
             deviation = np.unravel_index(np.argmax(corr), corr.shape)
             cm = center_of_mass(np.ones(corr.shape))
@@ -216,7 +253,6 @@ class ImageManager(object):
     def overlay_mask_base_image(self):
         """ Creates a new image with an overlay of the mask
         over the base image"""
-
         self.base_w_mask = mark_boundaries(self.base_image, img_as_uint(self.mask), color=(0, 1, 1), outline_color=None)
 
     def overlay_mask_fluor_image(self):
