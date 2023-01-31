@@ -40,6 +40,7 @@ class Cell(object):
         self.membsept_mask = None
 
         self.fluor = None
+        self.optional = None
         self.image = None
 
         self.stats = OrderedDict([("Area", 0),
@@ -83,6 +84,7 @@ class Cell(object):
         self.cyto_mask = None
 
         self.fluor = None
+        self.optional = None
         self.image = None
 
         self.stats = OrderedDict([("Area", 0),
@@ -232,8 +234,10 @@ class Cell(object):
         """ returns box of flurescence from fluor image """
 
         x0, y0, x1, y1 = self.box
-
-        return fluor[x0:x1 + 1, y0:y1 + 1]
+        try:
+            return fluor[x0:x1 + 1, y0:y1 + 1]
+        except TypeError:
+            return None
 
     def compute_cell_mask(self):
         x0, y0, x1, y1 = self.box
@@ -616,7 +620,9 @@ class Cell(object):
             self.base_box = self.fluor_box(image_manager.base_image)
         elif params.look_for_septum_in_optional:
             self.optional_box = self.fluor_box(image_manager.optional_image)
+
         self.fluor = self.fluor_box(image_manager.fluor_image)
+        self.optional = self.fluor_box(image_manager.optional_image)
 
         self.cell_mask = self.compute_cell_mask()
 
