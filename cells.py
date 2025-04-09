@@ -660,7 +660,7 @@ class Cell(object):
                                   self.sept_mask) > 0
                 if linmask is not None:
                     self.earlysept_mask = (self.perim_mask.astype(np.int))&(linmask.astype(np.int))
-                    self.fullsept_mask = (self.sept_mask.astype(np.int))&(self.earlysept_mask.astype(np.int))
+                    self.fullsept_mask = (self.sept_mask.astype(np.int))+(self.earlysept_mask.astype(np.int))
                     old_membrane = self.perim_mask
                     self.perim_mask = (old_membrane - linmask) > 0
             else:
@@ -688,7 +688,7 @@ class Cell(object):
                                   self.sept_mask) > 0
                 if linmask is not None:
                     self.earlysept_mask = (self.perim_mask.astype(np.int))&(linmask.astype(np.int))
-                    self.fullsept_mask = (self.sept_mask.astype(np.int))&(self.earlysept_mask.astype(np.int))
+                    self.fullsept_mask = (self.sept_mask.astype(np.int))+(self.earlysept_mask.astype(np.int))
                     old_membrane = self.perim_mask
                     self.perim_mask = (old_membrane - linmask) > 0
             else:
