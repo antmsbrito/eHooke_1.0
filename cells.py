@@ -794,6 +794,11 @@ class Cell(object):
 
             self.stats["Early Sept Median"] = self.measure_fluor(fluorbox, self.earlysept_mask) - self.stats["Baseline"]
 
+            self.stats["Full Septum Median"] = self.measure_fluor(fluorbox, self.fullsept_mask) - self.stats["Baseline"]
+            self.stats["Full Septum Median 10%"] = self.measure_fluor(fluorbox, self.fullsept_mask, 0.10) - self.stats["Baseline"]
+            self.stats["Full Septum Median 25%"] = self.measure_fluor(fluorbox, self.fullsept_mask, 0.25) - self.stats["Baseline"]
+            self.stats["Full Septum Median 75%"] = self.measure_fluor(fluorbox, self.fullsept_mask, 0.75) - self.stats["Baseline"]
+
         else:
             self.stats["Septum Median"] = 0
 
@@ -808,6 +813,10 @@ class Cell(object):
             self.stats["Memb+Sept Median"] = 0
 
             self.stats["Early Sept Median"] = 0
+            self.stats["Full Septum Median"] = 0
+            self.stats["Full Septum Median 10%"] = 0
+            self.stats["Full Septum Median 25%"] = 0
+            self.stats["Full Septum Median 75%"] = 0
 
     def set_image(self, params, images, background):
         """ creates a strip with the cell in different images
