@@ -40,6 +40,7 @@ class Cell(object):
         self.membsept_mask = None
 
         self.earlysept_mask = None
+        self.fullsept_mask = None
 
         self.fluor = None
         self.optional = None
@@ -57,10 +58,16 @@ class Cell(object):
                                   ("Membrane Median", 0),
                                   ("Septum Median", 0),
                                   ("Cytoplasm Median", 0),
+                                  ("Full Septum Median", 0),
+                                  ("Full Septum Median 75%", 0),
+                                  ("Full Septum Median 25%", 0),
+                                  ("Full Septum Median 10%", 0),
+                                  ("Early Sept Median", 0),
                                   ("Fluor Ratio", 0),
                                   ("Fluor Ratio 75%", 0),
                                   ("Fluor Ratio 25%", 0),
                                   ("Fluor Ratio 10%", 0),
+                                  ("Memb+Sept Median", 0),
                                   ("Cell Cycle Phase", 0)])
 
         self.selection_state = 1
@@ -103,6 +110,11 @@ class Cell(object):
                                   ("Membrane Median", 0),
                                   ("Septum Median", 0),
                                   ("Cytoplasm Median", 0),
+                                  ("Full Septum Median", 0),
+                                  ("Full Septum Median 75%", 0),
+                                  ("Full Septum Median 25%", 0),
+                                  ("Full Septum Median 10%", 0),
+                                  ("Early Sept Median", 0),
                                   ("Fluor Ratio", 0),
                                   ("Fluor Ratio 75%", 0),
                                   ("Fluor Ratio 25%", 0),
@@ -648,6 +660,7 @@ class Cell(object):
                                   self.sept_mask) > 0
                 if linmask is not None:
                     self.earlysept_mask = (self.perim_mask.astype(np.int))&(linmask.astype(np.int))
+                    self.fullsept_mask = (self.sept_mask.astype(np.int))&(self.earlysept_mask.astype(np.int))
                     old_membrane = self.perim_mask
                     self.perim_mask = (old_membrane - linmask) > 0
             else:
@@ -675,6 +688,7 @@ class Cell(object):
                                   self.sept_mask) > 0
                 if linmask is not None:
                     self.earlysept_mask = (self.perim_mask.astype(np.int))&(linmask.astype(np.int))
+                    self.fullsept_mask = (self.sept_mask.astype(np.int))&(self.earlysept_mask.astype(np.int))
                     old_membrane = self.perim_mask
                     self.perim_mask = (old_membrane - linmask) > 0
             else:
